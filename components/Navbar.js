@@ -17,8 +17,8 @@ const Navbar = () => (
         justify-content: space-between;
         align-items: center;
         padding: 1rem 2rem;
-        background-color: #333;
-        color: white;
+        background-color: #a3d4f2;
+        color: #0288d1;
       }
       .navbar-brand {
         font-size: 1.5rem;

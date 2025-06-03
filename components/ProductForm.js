@@ -9,14 +9,13 @@ const ProductForm = ({ productData = {} }) => {
     name: productData.name || '',
     description: productData.description || '',
     price: productData.price || '',
-    // image sẽ được xử lý riêng nếu là file upload
-    image: productData.image || '', // Giữ lại để hiển thị URL nếu có từ database
+    image: productData.image || '',
   });
-  const [selectedFile, setSelectedFile] = useState(null); // State mới cho file được chọn
-  const [filePreview, setFilePreview] = useState(productData.image || ''); // State cho preview ảnh
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [filePreview, setFilePreview] = useState(productData.image || '');
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadingImage, setUploadingImage] = useState(false); // State cho trạng thái upload ảnh
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     if (productData && productData._id) {
@@ -26,43 +25,45 @@ const ProductForm = ({ productData = {} }) => {
         price: productData.price || '',
         image: productData.image || '',
       });
-      setFilePreview(productData.image || ''); // Cập nhật preview khi có productData
-      setSelectedFile(null); // Reset file khi chuyển sang sản phẩm khác
+      setFilePreview(productData.image || '');
+      setSelectedFile(null);
     } else {
-        setForm({
-            name: '',
-            description: '',
-            price: '',
-            image: '',
-        });
-        setFilePreview(''); // Reset preview trên trang add mới
-        setSelectedFile(null); // Reset file trên trang add mới
+      if (form.name || form.description || form.price || form.image || selectedFile || filePreview) {
+          setForm({
+              name: '',
+              description: '',
+              price: '',
+              image: '',
+          });
+          setFilePreview('');
+          setSelectedFile(null);
+      }
     }
     if (message) {
-        setMessage('');
+      setMessage('');
     }
   }, [productData, message]);
 
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    setForm(prevForm => ({
+      ...prevForm,
+      [name]: value, // Đảm bảo dòng này đã được sửa
+    }));
   };
 
-  // Hàm xử lý khi chọn file
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setSelectedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFilePreview(reader.result); // Hiển thị preview ảnh
+        setFilePreview(reader.result);
       };
       reader.readAsDataURL(file);
     } else {
       setSelectedFile(null);
-      setFilePreview(form.image || ''); // Reset preview nếu không có file chọn
+      setFilePreview(form.image || '');
     }
   };
 
@@ -82,36 +83,33 @@ const ProductForm = ({ productData = {} }) => {
       return;
     }
 
-    let imageUrl = form.image; // Giữ lại URL cũ nếu không có file mới
+    let imageUrl = form.image;
     if (selectedFile) {
       setUploadingImage(true);
       const formData = new FormData();
       formData.append('file', selectedFile);
 
       try {
-        // Gửi file đến API endpoint mới để tải lên ảnh
         const uploadRes = await fetch('/api/upload-image', {
           method: 'POST',
-          body: formData, // FormData sẽ tự động đặt Content-Type là multipart/form-data
+          body: formData,
         });
         const uploadData = await uploadRes.json();
 
         if (!uploadRes.ok) {
           throw new Error(uploadData.message || 'Image upload failed');
         }
-        imageUrl = uploadData.imageUrl; // Lấy URL từ phản hồi của server
-        setMessage('Image uploaded successfully!');
+        imageUrl = uploadData.imageUrl;
       } catch (uploadError) {
         setMessage(`Image upload error: ${uploadError.message}`);
         setIsSubmitting(false);
         setUploadingImage(false);
-        return; // Dừng nếu upload ảnh thất bại
+        return;
       } finally {
         setUploadingImage(false);
       }
     }
 
-    // Dữ liệu sản phẩm để gửi đến API sản phẩm
     const productDataToSend = { ...form, image: imageUrl };
 
     try {
@@ -125,7 +123,7 @@ const ProductForm = ({ productData = {} }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(productDataToSend), // Gửi dữ liệu đã bao gồm URL ảnh mới
+        body: JSON.stringify(productDataToSend),
       });
 
       const data = await res.json();
@@ -133,7 +131,7 @@ const ProductForm = ({ productData = {} }) => {
       if (res.ok) {
         setMessage('Product saved successfully!');
         setTimeout(() => {
-          router.push(productData._id ? `/products/${productData._id}` : '/');
+          router.push('/');
         }, 1500);
       } else {
         setMessage(`Error: ${data.message || 'Something went wrong!'}`);
@@ -156,8 +154,8 @@ const ProductForm = ({ productData = {} }) => {
             type="text"
             id="name"
             name="name"
-            value={form.name}
-            onChange={handleChange}
+            value={form.name} // <-- Đảm bảo có thuộc tính này
+            onChange={handleChange} // <-- Đảm bảo có thuộc tính này
             required
           />
         </div>
@@ -166,8 +164,8 @@ const ProductForm = ({ productData = {} }) => {
           <textarea
             id="description"
             name="description"
-            value={form.description}
-            onChange={handleChange}
+            value={form.description} // <-- Đảm bảo có thuộc tính này
+            onChange={handleChange} // <-- Đảm bảo có thuộc tính này
             required
           />
         </div>
@@ -177,8 +175,8 @@ const ProductForm = ({ productData = {} }) => {
             type="number"
             id="price"
             name="price"
-            value={form.price}
-            onChange={handleChange}
+            value={form.price} // <-- Đảm bảo có thuộc tính này
+            onChange={handleChange} // <-- Đảm bảo có thuộc tính này
             required
           />
         </div>
@@ -189,7 +187,7 @@ const ProductForm = ({ productData = {} }) => {
             type="file"
             id="imageUpload"
             name="imageUpload"
-            accept="image/*" // Chỉ cho phép chọn file ảnh
+            accept="image/*"
             onChange={handleFileChange}
           />
           {filePreview && (
@@ -202,33 +200,104 @@ const ProductForm = ({ productData = {} }) => {
         <button type="submit" disabled={isSubmitting || uploadingImage} className="submit-button">
           {isSubmitting ? 'Saving...' : (uploadingImage ? 'Uploading Image...' : (productData._id ? 'Update Product' : 'Add Product'))}
         </button>
-        <Link href={productData._id ? `/products/${productData._id}` : '/'} className="cancel-button">
+        <Link href="/" className="cancel-button">
             Cancel
         </Link>
       </form>
 
       <style jsx>{`
-        /* Giữ lại các style cũ */
-        .form-container { /* ... */ }
-        .form-title { /* ... */ }
-        .message { /* ... */ }
-        .message.success { /* ... */ }
-        .message.error { /* ... */ }
-        .product-form .form-group { /* ... */ }
-        .product-form label { /* ... */ }
+        .form-container {
+          max-width: 600px;
+          margin: 2rem auto;
+          padding: 2rem;
+          background-color: white;
+          border-radius: 10px;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .form-title {
+          text-align: center;
+          color: #2c3e50;
+          margin-bottom: 2rem;
+        }
+        .message {
+          padding: 1rem;
+          border-radius: 5px;
+          margin-bottom: 1.5rem;
+          text-align: center;
+          font-weight: bold;
+        }
+        .message.success {
+          background-color: #d4edda;
+          color: #155724;
+          border: 1px solid #c3e6cb;
+        }
+        .message.error {
+          background-color: #f8d7da;
+          color: #721c24;
+          border: 1px solid #f5c6cb;
+        }
+        .product-form .form-group {
+          margin-bottom: 1.5rem;
+        }
+        .product-form label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-weight: bold;
+          color: #555;
+        }
         .product-form input[type="text"],
         .product-form input[type="number"],
-        .product-form textarea { /* ... */ }
-        .product-form textarea { /* ... */ }
+        .product-form textarea {
+          width: 100%;
+          padding: 0.8rem;
+          border: 1px solid #ddd;
+          border-radius: 5px;
+          font-size: 1rem;
+          box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        .product-form textarea {
+          resize: vertical;
+          min-height: 120px;
+        }
         .product-form input:focus,
-        .product-form textarea:focus { /* ... */ }
-        .submit-button { /* ... */ }
-        .submit-button:hover:not(:disabled) { /* ... */ }
-        .submit-button:disabled { /* ... */ }
-        .cancel-button { /* ... */ }
-        .cancel-button:hover { /* ... */ }
-
-        /* Thêm style cho preview ảnh */
+        .product-form textarea:focus {
+          outline: none;
+          border-color: #3498db;
+          box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+        }
+        .submit-button {
+          background-color: #28a745;
+          color: white;
+          padding: 1rem 1.5rem;
+          border: none;
+          border-radius: 5px;
+          font-size: 1.1rem;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+          width: 100%;
+          margin-top: 1rem;
+        }
+        .submit-button:hover:not(:disabled) {
+          background-color: #218838;
+        }
+        .submit-button:disabled {
+          background-color: #cccccc;
+          cursor: not-allowed;
+        }
+        .cancel-button {
+            display: block;
+            text-align: center;
+            margin-top: 1rem;
+            padding: 1rem 1.5rem;
+            background-color: #f0ad4e;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+        }
+        .cancel-button:hover {
+            background-color: #ec971f;
+        }
         .image-preview-container {
           margin-top: 1rem;
           text-align: center;

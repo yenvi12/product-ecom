@@ -18,8 +18,8 @@ const ProductSchema = new mongoose.Schema({
     min: [0, 'Price cannot be negative.'],
   },
   image: {
-    type: String, // Store URL of the image
-    required: false, // Optional
+    type: String, // Đây là nơi lưu trữ URL của hình ảnh từ Cloudinary
+    required: false, // Hình ảnh là tùy chọn, không bắt buộc
   },
 });
 

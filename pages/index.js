@@ -65,7 +65,7 @@ export default function Home() {
         .page-title {
           text-align: center;
           margin-bottom: 2rem;
-          color: #2c3e50;
+          color:rgb(207, 204, 115);
         }
         .product-grid {
           display: grid;
@@ -73,9 +73,9 @@ export default function Home() {
           gap: 2rem;
         }
         .product-card {
-          background-color: white;
+          background-color: #c6e7f8;
           border-radius: 8px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 4px 12px rgba(109, 189, 218, 0.1);
           overflow: hidden;
           display: flex;
           flex-direction: column;
@@ -87,7 +87,7 @@ export default function Home() {
         .product-image {
           width: 100%;
           height: 200px;
-          object-fit: cover;
+          object-fit: contain; /* <-- ĐÃ THAY ĐỔI TỪ 'cover' SANG 'contain' */
           display: block;
         }
         .product-info {
