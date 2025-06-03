@@ -1,7 +1,5 @@
-// components/ProductForm.js
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 
 const ProductForm = ({ productData = {} }) => {
   const router = useRouter();
@@ -27,28 +25,14 @@ const ProductForm = ({ productData = {} }) => {
       });
       setFilePreview(productData.image || '');
       setSelectedFile(null);
-    } else {
-      if (form.name || form.description || form.price || form.image || selectedFile || filePreview) {
-          setForm({
-              name: '',
-              description: '',
-              price: '',
-              image: '',
-          });
-          setFilePreview('');
-          setSelectedFile(null);
-      }
     }
-    if (message) {
-      setMessage('');
-    }
-  }, [productData, message]);
+  }, [productData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm(prevForm => ({
       ...prevForm,
-      [name]: value, // Đảm bảo dòng này đã được sửa
+      [name]: value,
     }));
   };
 
@@ -77,6 +61,7 @@ const ProductForm = ({ productData = {} }) => {
       setIsSubmitting(false);
       return;
     }
+
     if (isNaN(parseFloat(form.price)) || parseFloat(form.price) < 0) {
       setMessage('Price must be a positive number.');
       setIsSubmitting(false);
@@ -130,9 +115,7 @@ const ProductForm = ({ productData = {} }) => {
 
       if (res.ok) {
         setMessage('Product saved successfully!');
-        setTimeout(() => {
-          router.push('/');
-        }, 1500);
+        // Không tự động điều hướng nữa để giữ lại message
       } else {
         setMessage(`Error: ${data.message || 'Something went wrong!'}`);
       }
@@ -146,7 +129,11 @@ const ProductForm = ({ productData = {} }) => {
   return (
     <div className="form-container">
       <h1 className="form-title">{productData._id ? 'Edit Product' : 'Add New Product'}</h1>
-      {message && <p className={`message ${message.includes('Error') || message.includes('upload error') ? 'error' : 'success'}`}>{message}</p>}
+      {message && (
+        <p className={`message ${message.includes('Error') || message.includes('upload error') ? 'error' : 'success'}`}>
+          {message}
+        </p>
+      )}
       <form onSubmit={handleSubmit} className="product-form">
         <div className="form-group">
           <label htmlFor="name">Name:</label>
@@ -154,8 +141,8 @@ const ProductForm = ({ productData = {} }) => {
             type="text"
             id="name"
             name="name"
-            value={form.name} // <-- Đảm bảo có thuộc tính này
-            onChange={handleChange} // <-- Đảm bảo có thuộc tính này
+            value={form.name}
+            onChange={handleChange}
             required
           />
         </div>
@@ -164,8 +151,8 @@ const ProductForm = ({ productData = {} }) => {
           <textarea
             id="description"
             name="description"
-            value={form.description} // <-- Đảm bảo có thuộc tính này
-            onChange={handleChange} // <-- Đảm bảo có thuộc tính này
+            value={form.description}
+            onChange={handleChange}
             required
           />
         </div>
@@ -175,12 +162,12 @@ const ProductForm = ({ productData = {} }) => {
             type="number"
             id="price"
             name="price"
-            value={form.price} // <-- Đảm bảo có thuộc tính này
-            onChange={handleChange} // <-- Đảm bảo có thuộc tính này
+            value={form.price}
+            onChange={handleChange}
             required
           />
         </div>
-        {/* Trường input file */}
+
         <div className="form-group">
           <label htmlFor="imageUpload">Upload Image (Optional):</label>
           <input
@@ -200,9 +187,14 @@ const ProductForm = ({ productData = {} }) => {
         <button type="submit" disabled={isSubmitting || uploadingImage} className="submit-button">
           {isSubmitting ? 'Saving...' : (uploadingImage ? 'Uploading Image...' : (productData._id ? 'Update Product' : 'Add Product'))}
         </button>
-        <Link href="/" className="cancel-button">
-            Cancel
-        </Link>
+
+        <button
+          type="button"
+          className="cancel-button"
+          onClick={() => router.push('/')}
+        >
+          Cancel
+        </button>
       </form>
 
       <style jsx>{`
@@ -253,7 +245,6 @@ const ProductForm = ({ productData = {} }) => {
           border: 1px solid #ddd;
           border-radius: 5px;
           font-size: 1rem;
-          box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
         }
         .product-form textarea {
           resize: vertical;
@@ -265,17 +256,20 @@ const ProductForm = ({ productData = {} }) => {
           border-color: #3498db;
           box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
         }
+        .submit-button,
+        .cancel-button {
+          width: 100%;
+          padding: 1rem 1.5rem;
+          font-size: 1.1rem;
+          border: none;
+          border-radius: 5px;
+          margin-top: 1rem;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+        }
         .submit-button {
           background-color: #28a745;
           color: white;
-          padding: 1rem 1.5rem;
-          border: none;
-          border-radius: 5px;
-          font-size: 1.1rem;
-          cursor: pointer;
-          transition: background-color 0.2s ease;
-          width: 100%;
-          margin-top: 1rem;
         }
         .submit-button:hover:not(:disabled) {
           background-color: #218838;
@@ -285,18 +279,11 @@ const ProductForm = ({ productData = {} }) => {
           cursor: not-allowed;
         }
         .cancel-button {
-            display: block;
-            text-align: center;
-            margin-top: 1rem;
-            padding: 1rem 1.5rem;
-            background-color: #f0ad4e;
-            color: white;
-            border-radius: 5px;
-            text-decoration: none;
-            transition: background-color 0.2s ease;
+          background-color: #f0ad4e;
+          color: white;
         }
         .cancel-button:hover {
-            background-color: #ec971f;
+          background-color: #ec971f;
         }
         .image-preview-container {
           margin-top: 1rem;
