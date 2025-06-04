@@ -64,13 +64,17 @@ export default function Home() {
       <style jsx>{`
         .page-title {
           text-align: center;
-          margin-bottom: 2rem;
+          margin-bottom: 16px;
           color:rgb(207, 204, 115);
         }
         .product-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 2rem;
+        display: grid;
+          /* Chia lưới thành 3 cột bằng nhau, mỗi cột chiếm 1 phần không gian */
+          grid-template-columns: repeat(4, 1fr);
+          gap: 2rem; /* Khoảng cách giữa các sản phẩm */
+          padding: 10px; /* Khoảng đệm cho lưới, không quá sát mép */
+          max-width: 1500px; /* Giới hạn chiều rộng tối đa của lưới */
+          margin: 0 auto; /* Căn giữa lưới trên các màn hình lớn */
         }
         .product-card {
           background-color: #c6e7f8;
